@@ -1,9 +1,11 @@
-using JetBrains.Annotations;
 using System;
 using UnityEngine;
 
 public class Chessboard : MonoBehaviour
 {
+    [Header("Graphics Settings")]
+    [SerializeField] private Material tileMaterial;
+    
     //Logic fields
     private const int TILE_COUNT_X = 8;
     private const int TILE_COUNT_Y = 8;
@@ -13,7 +15,8 @@ public class Chessboard : MonoBehaviour
     {
         GenerataAllFiles(1, TILE_COUNT_X, TILE_COUNT_Y);
     }
-    
+
+    //Generate board
     private void GenerataAllFiles(float tileSize, int tileCountX, int tileCountY)
     {
         tiles = new GameObject[tileCountX, tileCountY];
@@ -29,7 +32,7 @@ public class Chessboard : MonoBehaviour
         
         Mesh mesh = new Mesh();
         tileObject.AddComponent<MeshFilter>().mesh = mesh;
-        tileObject.AddComponent<MeshRenderer>();
+        tileObject.AddComponent<MeshRenderer>().material = tileMaterial;
 
         Vector3[] vertices = new Vector3[4];
         vertices[0] = new Vector3(x * tileSize, 0, y * tileSize);
@@ -46,4 +49,6 @@ public class Chessboard : MonoBehaviour
         tileObject.AddComponent<BoxCollider>();
         return tileObject;
     }
+
+
 }
