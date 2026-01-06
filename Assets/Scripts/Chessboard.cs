@@ -10,10 +10,53 @@ public class Chessboard : MonoBehaviour
     private const int TILE_COUNT_X = 8;
     private const int TILE_COUNT_Y = 8;
     private GameObject[,] tiles;
+    private Camera currentCamera;
+    private Vector2Int currentHover;
 
     private void Awake()
     {
         GenerataAllFiles(1, TILE_COUNT_X, TILE_COUNT_Y);
+    }
+
+    private void Update()
+    {
+        if(!currentCamera)
+        {
+            currentCamera = Camera.current;
+            return;
+        }
+        RaycastHit info;
+        Ray ray = currentCamera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out info, 100, LayerMask.GetMask("Tile")))
+        {
+            //Get indexes off tiles being hit
+            Vector2Int hitPosition = LookupTileIndex(info.collider.gameObject);
+            
+            //Display hover effect after not hovering any tiles
+            if(currentHover == -Vector2Int.one)
+            {
+                //First time hovering
+                currentHover = hitPosition;
+                tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
+            }
+
+            //Display hover effect after hitting a tiles
+            if (currentHover != hitPosition)
+            {
+                //First time hovering
+                tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
+                currentHover = hitPosition;
+                tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
+            }
+        }
+        else
+        {
+            if(currentHover != -Vector2Int.one)
+            {
+                tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
+                currentHover = -Vector2Int.one;
+            }
+        }
     }
 
     //Generate board
@@ -46,9 +89,20 @@ public class Chessboard : MonoBehaviour
         mesh.vertices = vertices;
         mesh.triangles = tris;
         
+        tileObject.layer = LayerMask.NameToLayer("Tile");
         tileObject.AddComponent<BoxCollider>();
         return tileObject;
     }
 
+    //Operations
+    private Vector2Int LookupTileIndex(GameObject hitInfo)
+    {
+        for (int x = 0; x < TILE_COUNT_X; x++)
+            for (int y = 0; y < TILE_COUNT_Y; y++)
+                if (tiles[x, y] == hitInfo)
+                    return new Vector2Int(x, y);
+
+        return -Vector2Int.one;
+    }
 
 }
