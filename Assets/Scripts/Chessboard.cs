@@ -76,7 +76,7 @@ public class Chessboard : MonoBehaviour
         
         Mesh mesh = new Mesh();
         tileObject.AddComponent<MeshFilter>().mesh = mesh;
-        //Add materials on creation
+        //Add materials on creation 
         tileObject.AddComponent<MeshRenderer>().material = tileMaterial;
 
         Vector3[] vertices = new Vector3[4];
@@ -99,6 +99,7 @@ public class Chessboard : MonoBehaviour
     //Operations
     private Vector2Int LookupTileIndex(GameObject hitInfo)
     {
+        //Vectoring through all tiles to find the hit one
         for (int x = 0; x < TILE_COUNT_X; x++)
             for (int y = 0; y < TILE_COUNT_Y; y++)
                 if (tiles[x, y] == hitInfo)
