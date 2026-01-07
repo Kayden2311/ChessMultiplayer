@@ -51,7 +51,8 @@ public class Chessboard : MonoBehaviour
         }
         else
         {
-            if(currentHover != -Vector2Int.one)
+            //If hovering out of bound reset hover effect
+            if (currentHover != -Vector2Int.one)
             {
                 tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
                 currentHover = -Vector2Int.one;
