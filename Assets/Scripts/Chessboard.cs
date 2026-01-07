@@ -79,6 +79,7 @@ public class Chessboard : MonoBehaviour
         //Add materials on creation 
         tileObject.AddComponent<MeshRenderer>().material = tileMaterial;
 
+        //Define vertices
         Vector3[] vertices = new Vector3[4];
         vertices[0] = new Vector3(x * tileSize, 0, y * tileSize);
         vertices[1] = new Vector3(x * tileSize, 0, (y + 1) * tileSize);
