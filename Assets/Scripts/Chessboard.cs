@@ -76,6 +76,7 @@ public class Chessboard : MonoBehaviour
         
         Mesh mesh = new Mesh();
         tileObject.AddComponent<MeshFilter>().mesh = mesh;
+        //Add materials on creation
         tileObject.AddComponent<MeshRenderer>().material = tileMaterial;
 
         Vector3[] vertices = new Vector3[4];
