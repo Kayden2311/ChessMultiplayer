@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Chessboard : MonoBehaviour
 {
@@ -22,15 +23,15 @@ public class Chessboard : MonoBehaviour
     {
         if(!currentCamera)
         {
-            currentCamera = Camera.current;
+            currentCamera = Camera.main;
             return;
         }
         RaycastHit info;
-        Ray ray = currentCamera.ScreenPointToRay(Input.mousePosition);
+        Ray ray = currentCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out info, 100, LayerMask.GetMask("Tile")))
         {
             //Get indexes off tiles being hit
-            Vector2Int hitPosition = LookupTileIndex(info.collider.gameObject);
+            Vector2Int hitPosition = LookupTileIndex(info.transform.gameObject);
             
             //Display hover effect after not hovering any tiles
             if(currentHover == -Vector2Int.one)
