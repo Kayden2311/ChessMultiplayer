@@ -1,114 +1,132 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Chessboard : MonoBehaviour
 {
-    [Header("Graphics Settings")]
-    [SerializeField] private Material tileMaterial;
-    
-    //Logic fields
+    [Header("Graphics")]
+    [SerializeField] private GameObject tilePrefab;
+    [SerializeField] private Material whiteMat;
+    [SerializeField] private Material blackMat;
+    [SerializeField] private Material hoverMat;
+    [SerializeField] private float cameraHeight = 7f;
+    [SerializeField] private float cameraDistance = 6f;
+
+
     private const int TILE_COUNT_X = 8;
     private const int TILE_COUNT_Y = 8;
+
     private GameObject[,] tiles;
+    private Material[,] originalMats;
+
     private Camera currentCamera;
-    private Vector2Int currentHover;
+    private Vector2Int currentHover = -Vector2Int.one;
 
     private void Awake()
     {
-        GenerataAllFiles(1, TILE_COUNT_X, TILE_COUNT_Y);
+        GenerateAllTiles(1);
+        PositionCamera();
     }
 
     private void Update()
     {
-        if(!currentCamera)
+        if (!currentCamera)
         {
             currentCamera = Camera.main;
             return;
         }
-        RaycastHit info;
-        Ray ray = currentCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (Physics.Raycast(ray, out info, 100, LayerMask.GetMask("Tile")))
-        {
-            //Get indexes off tiles being hit
-            Vector2Int hitPosition = LookupTileIndex(info.transform.gameObject);
-            
-            //Display hover effect after not hovering any tiles
-            if(currentHover == -Vector2Int.one)
-            {
-                //First time hovering
-                currentHover = hitPosition;
-                tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
-            }
 
-            //Display hover effect after hitting a tiles
-            if (currentHover != hitPosition)
+        Ray ray = currentCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 100, LayerMask.GetMask("Tile")))
+        {
+            Vector2Int hitPos = LookupTileIndex(hit.transform.gameObject);
+
+            if (currentHover != hitPos)
             {
-                //First time hovering
-                tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
-                currentHover = hitPosition;
-                tiles[hitPosition.x, hitPosition.y].layer = LayerMask.NameToLayer("Hover");
+                ClearHover();
+                currentHover = hitPos;
+                SetHover(hitPos);
             }
         }
         else
         {
-            //If hovering out of bound reset hover effect
-            if (currentHover != -Vector2Int.one)
+            ClearHover();
+        }
+    }
+
+    // -------- Hover --------
+    private void SetHover(Vector2Int pos)
+    {
+        MeshRenderer mr = tiles[pos.x, pos.y].GetComponent<MeshRenderer>();
+        mr.material = hoverMat;
+    }
+
+    private void ClearHover()
+    {
+        if (currentHover == -Vector2Int.one) return;
+
+        MeshRenderer mr = tiles[currentHover.x, currentHover.y].GetComponent<MeshRenderer>();
+        mr.material = originalMats[currentHover.x, currentHover.y];
+        currentHover = -Vector2Int.one;
+    }
+
+    // -------- Board Generation --------
+    private void GenerateAllTiles(float tileSize)
+    {
+        tiles = new GameObject[TILE_COUNT_X, TILE_COUNT_Y];
+        originalMats = new Material[TILE_COUNT_X, TILE_COUNT_Y];
+
+        for (int x = 0; x < TILE_COUNT_X; x++)
+        {
+            for (int y = 0; y < TILE_COUNT_Y; y++)
             {
-                tiles[currentHover.x, currentHover.y].layer = LayerMask.NameToLayer("Tile");
-                currentHover = -Vector2Int.one;
+                tiles[x, y] = GenerateSingleTile(tileSize, x, y);
             }
         }
     }
 
-    //Generate board
-    private void GenerataAllFiles(float tileSize, int tileCountX, int tileCountY)
-    {
-        tiles = new GameObject[tileCountX, tileCountY];
-        //Nested loops to generate tiles
-        for (int x= 0; x < tileCountX; x++)
-            for (int y = 0; y < tileCountY; y++)
-                tiles[x, y] = GenerateSingleTile(tileSize, x, y);
-    }
-
     private GameObject GenerateSingleTile(float tileSize, int x, int y)
     {
-        GameObject tileObject = new GameObject(string.Format("X: {0}, Y:{1}", x, y));
-        tileObject.transform.parent = this.transform;
-        
-        Mesh mesh = new Mesh();
-        tileObject.AddComponent<MeshFilter>().mesh = mesh;
-        //Add materials on creation 
-        tileObject.AddComponent<MeshRenderer>().material = tileMaterial;
+        GameObject tile = Instantiate(tilePrefab, transform);
+        tile.name = $"Tile {x},{y}";
+        tile.transform.position = new Vector3(x * tileSize, 0, y * tileSize);
 
-        //Define vertices
-        Vector3[] vertices = new Vector3[4];
-        vertices[0] = new Vector3(x * tileSize, 0, y * tileSize);
-        vertices[1] = new Vector3(x * tileSize, 0, (y + 1) * tileSize);
-        vertices[2] = new Vector3((x + 1) * tileSize, 0, y * tileSize);
-        vertices[3] = new Vector3((x + 1) * tileSize, 0, (y + 1) * tileSize);
+        bool isWhite = (x + y) % 2 == 0;
+        Material baseMat = isWhite ? whiteMat : blackMat;
 
-        
-        int[] tris = new int[] {0, 1, 2, 1, 3, 2 };
-        
-        mesh.vertices = vertices;
-        mesh.triangles = tris;
-        
-        tileObject.layer = LayerMask.NameToLayer("Tile");
-        tileObject.AddComponent<BoxCollider>();
-        return tileObject;
+        MeshRenderer mr = tile.GetComponent<MeshRenderer>();
+        mr.material = baseMat;
+        originalMats[x, y] = baseMat;
+
+        tile.layer = LayerMask.NameToLayer("Tile");
+        return tile;
     }
 
-    //Operations
-    private Vector2Int LookupTileIndex(GameObject hitInfo)
+    // -------- Utils --------
+    private Vector2Int LookupTileIndex(GameObject hitTile)
     {
-        //Vectoring through all tiles to find the hit one
         for (int x = 0; x < TILE_COUNT_X; x++)
             for (int y = 0; y < TILE_COUNT_Y; y++)
-                if (tiles[x, y] == hitInfo)
+                if (tiles[x, y] == hitTile)
                     return new Vector2Int(x, y);
 
         return -Vector2Int.one;
+    }
+    // -------- Camera Positioning --------
+    private void PositionCamera()
+    {
+        if (!Camera.main) return;
+
+        Vector3 boardCenter = new Vector3(
+            (TILE_COUNT_X - 1) * 0.5f,
+            0,
+            (TILE_COUNT_Y - 1) * 0.5f
+        );
+
+        Camera.main.transform.position = boardCenter
+            + new Vector3(0, cameraHeight, -cameraDistance);
+
+        Camera.main.transform.LookAt(boardCenter);
     }
 
 }

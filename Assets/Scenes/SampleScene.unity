@@ -462,6 +462,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chessboard
   tileMaterial: {fileID: 2100000, guid: 4af6c96c36c41c74bb996fa1e88d9e29, type: 2}
+  tilePrefab: {fileID: 8354169871715676021, guid: 980d34165b1842e4a8524d2bf4f9514d, type: 3}
+  whiteMat: {fileID: 2100000, guid: b93017c53780da0468d6612cddc99b58, type: 2}
+  blackMat: {fileID: 2100000, guid: ceaf0e94b7b1b1547baa2ec322634859, type: 2}
 --- !u!4 &1878240840
 Transform:
   m_ObjectHideFlags: 0
