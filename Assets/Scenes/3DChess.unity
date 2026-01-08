@@ -206,7 +206,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.38757405, y: 0.006589595, z: 0.00093428575, w: 0.9218145}
-  m_LocalPosition: {x: 4, y: 3.04, z: -1.35}
+  m_LocalPosition: {x: 3.9, y: 3.9, z: -2.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -461,10 +461,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f05daa597fce8b4c9baf4564b29c861, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chessboard
-  tileMaterial: {fileID: 2100000, guid: 4af6c96c36c41c74bb996fa1e88d9e29, type: 2}
   tilePrefab: {fileID: 8354169871715676021, guid: 980d34165b1842e4a8524d2bf4f9514d, type: 3}
   whiteMat: {fileID: 2100000, guid: b93017c53780da0468d6612cddc99b58, type: 2}
   blackMat: {fileID: 2100000, guid: ceaf0e94b7b1b1547baa2ec322634859, type: 2}
+  hoverMat: {fileID: 2100000, guid: 1f97126f4b9228148896997c7e4d1bf2, type: 2}
+  cameraHeight: 7
+  cameraDistance: 6
 --- !u!4 &1878240840
 Transform:
   m_ObjectHideFlags: 0
